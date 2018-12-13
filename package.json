@@ -23,7 +23,7 @@
     }
   ],
   "scripts": {
-    "dev": "webpack --config webpack.config.js --watch",
+    "dev": "start-storybook -p 9001 -c .storybook",
     "build": "webpack --config webpack.config.js",
     "test": "bash ./test.sh",
     "test-unit": "jest test/unit/*.js",
@@ -45,6 +45,7 @@
     "regenerator-runtime": "^0.11.1"
   },
   "devDependencies": {
+    "@storybook/html": "^4.1.1",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-jest": "^23.2.0",
