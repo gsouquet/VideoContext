@@ -12,9 +12,12 @@ class TransitionNode extends EffectNode {
             audioNodesFactory: audioCtx => {
                 const inputLength = definition.inputs ? definition.inputs.length : 1;
                 const channelMerger = audioCtx.createChannelMerger(inputLength);
+                const gainNode = audioCtx.createGain();
+                channelMerger.connect(gainNode);
+
                 return {
                     input: channelMerger,
-                    output: channelMerger
+                    output: gainNode
                 };
             }
         };
@@ -230,7 +233,7 @@ class TransitionNode extends EffectNode {
     }
 
     disconnect() {
-        const isDisconnected = super.connect(arguments);
+        const isDisconnected = super.disconnect(arguments);
         // this._resetAudioParams();
         return isDisconnected;
     }
