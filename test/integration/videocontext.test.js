@@ -2,6 +2,9 @@ import VideoContext from "../../src/videocontext";
 
 let videocontext;
 require("webgl-mock");
+require("web-audio-test-api")
+    .createAPI("chrome:56")
+    .install();
 
 beforeEach(function() {
     const canvas = new HTMLCanvasElement(500, 500);
