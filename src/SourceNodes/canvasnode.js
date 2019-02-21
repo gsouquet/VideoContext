@@ -40,6 +40,7 @@ class CanvasNode extends SourceNode {
 
     _update(currentTime) {
         //if (!super._update(currentTime)) return false;
+        this._renderPaused = false;
         super._update(currentTime);
         if (
             this._startTime - this._currentTime <= this._preloadTime &&

@@ -8,20 +8,19 @@ class TransitionNode extends EffectNode {
      * Initialise an instance of a TransitionNode. You should not instantiate this directly, but use vc.transition().
      */
     constructor(gl, audioCtx, renderGraph, definition = {}) {
-        if (audioCtx) {
-            definition.hearable = {
-                audioNodesFactory: audioCtx => {
-                    const inputLength = definition.inputs ? definition.inputs.length : 1;
-                    const channelMerger = audioCtx.createChannelMerger(inputLength);
-                    const gainNode = audioCtx.createGain();
-                    channelMerger.connect(gainNode);
-                    return {
-                        input: channelMerger,
-                        output: gainNode
-                    };
-                }
-            };
-        }
+        definition.hearable = {
+            audioNodesFactory: audioCtx => {
+                const inputLength = definition.inputs ? definition.inputs.length : 1;
+                const channelMerger = audioCtx.createChannelMerger(inputLength);
+                const gainNode = audioCtx.createGain();
+                channelMerger.connect(gainNode);
+
+                return {
+                    input: channelMerger,
+                    output: gainNode
+                };
+            }
+        };
 
         super(gl, audioCtx, renderGraph, definition);
         this._transitions = {};
