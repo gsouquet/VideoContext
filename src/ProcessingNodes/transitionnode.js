@@ -10,14 +10,21 @@ class TransitionNode extends EffectNode {
     constructor(gl, audioCtx, renderGraph, definition = {}) {
         definition.hearable = {
             audioNodesFactory: audioCtx => {
-                const inputLength = definition.inputs ? definition.inputs.length : 1;
-                const channelMerger = audioCtx.createChannelMerger(inputLength);
-                const gainNode = audioCtx.createGain();
-                channelMerger.connect(gainNode);
+
+                const mergerNode = audioCtx.createGain();
+
+                const inputs = Array.from(
+                    { length: definition.inputs ? definition.inputs.length : 1 },
+                    () => {
+                        const gainNode = audioCtx.createGain();
+                        gainNode.connect(mergerNode);
+                        return gainNode;
+                    }
+                );
 
                 return {
-                    input: channelMerger,
-                    output: gainNode
+                    input: inputs,
+                    output: mergerNode
                 };
             }
         };
@@ -169,19 +176,32 @@ class TransitionNode extends EffectNode {
                     this[propertyName] = propertyValue;
 
                     if (this._audioCtx) {
-                        this.inputs.forEach((input, index) => {
-                            const value =
-                                index % 2 === 0
-                                    ? difference * progress - transition.target
+                        for (let i = 0; i < this.inputs.length; i++) {
+
+                            const value = i % 2 === 0
+                                    ? Math.abs(difference * progress - transition.target)
                                     : difference * progress + transition.current;
-                            input.outputAudioNode.gain.setValueAtTime(
+
+                            const node = this.inputAudioNode[i];
+                            node.gain.setValueAtTime(
                                 value,
                                 this._audioCtx.currentTime
                             );
-                        });
+                        }
                     }
 
                     break;
+                } else {
+                    // reset the node value
+                    if (this._audioCtx) {
+                        for (let i = 0; i < this.inputs.length; i++) {
+                            const node = this.inputAudioNode[i];
+                            node.gain.setValueAtTime(
+                                1,
+                                this._audioCtx.currentTime
+                            );
+                        }
+                    }
                 }
             }
 
@@ -189,56 +209,6 @@ class TransitionNode extends EffectNode {
         }
     }
 
-    // _setAudioParams() {
-    //     if (this._definition.hearable) {
-
-    //         const rampType = this._definition.hearable.rampType || `linear`;
-
-    //         Object.keys(this._transitions).forEach(transitionName => {
-    //             this._transitions[transitionName].forEach(({ start, end, current, target }) => {
-
-    //                 this.inputs.forEach((input, index) => {
-
-    //                     const addAudioTransition = () => {
-    //                         const initialValue = index % 2 === 0 ? current : target;
-    //                         const targetValue = index % 2 === 0 ? target : current;
-    //                         console.log(input.outputAudioNode);
-    //                         input.outputAudioNode.gain.setValueAtTime(initialValue, start);
-    //                         input.outputAudioNode.gain[`${rampType}RampToValueAtTime`](targetValue, end);
-    //                         input.unregisterCallback("audioready", addAudioTransition);
-    //                     };
-
-    //                     if (input._audioReady) {
-    //                         addAudioTransition();
-    //                     } else {
-    //                         input.registerCallback("audioready", addAudioTransition);
-    //                     }
-    //                 });
-
-    //             });
-    //         });
-    //     }
-    // }
-
-    // _resetAudioParams() {
-    //     if (this._definition.hearable) {
-    //         console.log("let's reset the audio params");
-    //     }
-    // }
-
-    connect() {
-        const isConnected = super.connect.apply(this, arguments);
-        // if (this._inputNames.length === this.inputs.length) {
-        //     this._setAudioParams();
-        // }
-        return isConnected;
-    }
-
-    disconnect() {
-        const isDisconnected = super.disconnect(arguments);
-        // this._resetAudioParams();
-        return isDisconnected;
-    }
 }
 
 export { TYPE as TRANSITIONTYPE };

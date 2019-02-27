@@ -125,17 +125,6 @@ class RenderGraph {
      * @return {boolean} Will return true if connection succeeds otherwise will throw a ConnectException.
      */
     registerConnection(sourceNode, destinationNode, target) {
-        if (sourceNode.hasAudio && sourceNode.webAudioEnabled && destinationNode.webAudioEnabled) {
-            if (sourceNode.outputAudioNode) {
-                sourceNode.outputAudioNode.connect(destinationNode.inputAudioNode);
-            } else {
-                const connectAudio = () => {
-                    sourceNode.outputAudioNode.connect(destinationNode.inputAudioNode);
-                    sourceNode.unregisterCallback("audioready");
-                };
-                sourceNode.registerCallback("audioready", connectAudio);
-            }
-        }
 
         if (
             destinationNode.inputs.length >= destinationNode.inputNames.length &&
@@ -189,6 +178,24 @@ class RenderGraph {
                 destination: destinationNode
             });
         }
+
+        if (sourceNode.hasAudio && sourceNode.webAudioEnabled && destinationNode.webAudioEnabled) {
+
+            if (sourceNode.outputAudioNode) {
+                const node = this.getDestinationAudioNode(sourceNode, destinationNode);
+                sourceNode.outputAudioNode.connect(node);
+            } else {
+                const connectAudio = () => {
+
+                    const node = this.getDestinationAudioNode(sourceNode, destinationNode);
+
+                    sourceNode.outputAudioNode.connect(node);
+                    sourceNode.unregisterCallback("audioready");
+                };
+                sourceNode.registerCallback("audioready", connectAudio.bind(this));
+            }
+        }
+
         return true;
     }
 
@@ -204,7 +211,13 @@ class RenderGraph {
         this.connections.forEach(function(connection) {
             if (connection.source === sourceNode && connection.destination === destinationNode) {
                 toRemove.push(connection);
-                sourceNode._outputAudioNode.disconnect(destinationNode._inputAudioNode);
+                if (Array.isArray(destinationNode.inputAudioNode)) {
+                    destinationNode.inputAudioNode.forEach(audioNode => {
+                        audioNode.disconnect(sourceNode.outputAudioNode);
+                    });
+                } else {
+                    sourceNode.outputAudioNode.disconnect(destinationNode.inputAudioNode);
+                }
             }
         });
 
@@ -216,6 +229,23 @@ class RenderGraph {
         });
 
         return true;
+    }
+
+    getDestinationAudioNode(sourceNode, destinationNode) {
+        if (Array.isArray(destinationNode.inputAudioNode)) {
+            let index = 0;
+            if (Array.isArray(destinationNode.inputs)) {
+                index = destinationNode.inputs.indexOf(sourceNode);
+            }
+            // console.log("////////////////////");
+            // console.log("destinationNode", destinationNode);
+            // console.log("sourceNode", sourceNode);
+            // console.log("index", index);
+            // console.log("////////////////////");
+            return destinationNode.inputAudioNode[index];
+        } else {
+            return destinationNode.inputAudioNode;
+        }
     }
 
     static outputEdgesFor(node, connections) {
