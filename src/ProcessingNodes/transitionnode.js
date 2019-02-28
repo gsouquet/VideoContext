@@ -10,7 +10,6 @@ class TransitionNode extends EffectNode {
     constructor(gl, audioCtx, renderGraph, definition = {}) {
         definition.hearable = {
             audioNodesFactory: audioCtx => {
-
                 const mergerNode = audioCtx.createGain();
 
                 const inputs = Array.from(
@@ -177,16 +176,13 @@ class TransitionNode extends EffectNode {
 
                     if (this._audioCtx) {
                         for (let i = 0; i < this.inputs.length; i++) {
-
-                            const value = i % 2 === 0
+                            const value =
+                                i % 2 === 0
                                     ? Math.abs(difference * progress - transition.target)
                                     : difference * progress + transition.current;
 
                             const node = this.inputAudioNode[i];
-                            node.gain.setValueAtTime(
-                                value,
-                                this._audioCtx.currentTime
-                            );
+                            node.gain.setValueAtTime(value, this._audioCtx.currentTime);
                         }
                     }
 
@@ -196,10 +192,7 @@ class TransitionNode extends EffectNode {
                     if (this._audioCtx) {
                         for (let i = 0; i < this.inputs.length; i++) {
                             const node = this.inputAudioNode[i];
-                            node.gain.setValueAtTime(
-                                1,
-                                this._audioCtx.currentTime
-                            );
+                            node.gain.setValueAtTime(1, this._audioCtx.currentTime);
                         }
                     }
                 }
@@ -208,7 +201,6 @@ class TransitionNode extends EffectNode {
             if (!transitionActive) this[propertyName] = value;
         }
     }
-
 }
 
 export { TYPE as TRANSITIONTYPE };
