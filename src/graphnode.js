@@ -7,7 +7,6 @@ class GraphNode {
      * Base class from which all processing and source nodes are derrived.
      */
     constructor(gl, audioCtx, renderGraph, inputNames, limitConnections = false) {
-        this._renderGraph = renderGraph;
         this._limitConnections = limitConnections;
         this._inputNames = inputNames;
         this._destroyed = false;
@@ -156,6 +155,9 @@ class GraphNode {
      *
      */
     connect(targetNode, targetPort) {
+        console.log(".///////////.");
+        console.log(this._displayName, this._renderGraph);
+        console.log(".///////////.");
         return this._renderGraph.registerConnection(this, targetNode, targetPort);
     }
 

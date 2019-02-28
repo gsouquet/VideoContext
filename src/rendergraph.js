@@ -238,11 +238,6 @@ class RenderGraph {
             if (Array.isArray(destinationNode.inputs)) {
                 index = destinationNode.inputs.indexOf(sourceNode);
             }
-            // console.log("////////////////////");
-            // console.log("destinationNode", destinationNode);
-            // console.log("sourceNode", sourceNode);
-            // console.log("index", index);
-            // console.log("////////////////////");
             return destinationNode.inputAudioNode[index];
         } else {
             return destinationNode.inputAudioNode;

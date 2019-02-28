@@ -8,7 +8,7 @@ class CanvasNode extends SourceNode {
      * This should not be called directly, but created through a call to videoContext.createCanvasNode();
      */
     constructor(canvas, gl, renderGraph, currentTime, preloadTime = 4) {
-        super(canvas, gl, renderGraph, currentTime);
+        super(canvas, gl, null, renderGraph, currentTime);
         this._preloadTime = preloadTime;
         this._displayName = TYPE;
     }
