@@ -90,6 +90,7 @@ export default class VideoContext {
 
         this._webAudioEnabled = options.webAudioEnabled;
         if (this._webAudioEnabled) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
             this._audioCtx = new AudioContext({
                 latencyHint: "interactive"
             });
