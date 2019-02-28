@@ -208,12 +208,16 @@ class RenderGraph {
         this.connections.forEach(function(connection) {
             if (connection.source === sourceNode && connection.destination === destinationNode) {
                 toRemove.push(connection);
-                if (Array.isArray(destinationNode.inputAudioNode)) {
-                    destinationNode.inputAudioNode.forEach(audioNode => {
-                        audioNode.disconnect(sourceNode.outputAudioNode);
-                    });
-                } else {
-                    sourceNode.outputAudioNode.disconnect(destinationNode.inputAudioNode);
+                try {
+                    if (Array.isArray(destinationNode.inputAudioNode)) {
+                        destinationNode.inputAudioNode.forEach(audioNode => {
+                            audioNode.disconnect(sourceNode.outputAudioNode);
+                        });
+                    } else {
+                        sourceNode.outputAudioNode.disconnect(destinationNode.inputAudioNode);
+                    }
+                } catch (e) {
+                    console.warn(e);
                 }
             }
         });

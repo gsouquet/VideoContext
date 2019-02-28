@@ -100,8 +100,20 @@ class MediaNode extends SourceNode {
     }
 
     set volume(volume) {
-        this._attributes.volume = volume;
-        if (this._element !== undefined) this._element.volume = this._attributes.volume;
+        if (this._outputAudioNode) {
+            this._outputAudioNode.gain.setValueAtTime(
+                volume,
+                this._audioCtx.currentTime
+            );
+        }
+    }
+
+    get volume() {
+        if (this._outputAudioNode) {
+            return this._outputAudioNode.gain.value;
+        } else {
+            return 1;
+        }
     }
 
     get hasAudio() {
@@ -118,7 +130,7 @@ class MediaNode extends SourceNode {
             this._element = media.element;
             this._audioNode = media.audioNode;
             this._outputAudioNode = media.audioNode;
-            this._element.volume = this._attributes.volume;
+            this.volume = this._attributes.volume;
             if (window.MediaStream !== undefined && this._elementURL instanceof MediaStream) {
                 this._element.srcObject = this._elementURL;
             } else {
