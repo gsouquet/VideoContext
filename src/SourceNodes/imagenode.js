@@ -19,6 +19,10 @@ class ImageNode extends SourceNode {
         return this._elementURL;
     }
 
+    get hasAudio() {
+        return false;
+    }
+
     _load() {
         if (this._image !== undefined) {
             for (var key in this._attributes) {

@@ -101,10 +101,7 @@ class MediaNode extends SourceNode {
 
     set volume(volume) {
         if (this._outputAudioNode) {
-            this._outputAudioNode.gain.setValueAtTime(
-                volume,
-                this._audioCtx.currentTime
-            );
+            this._outputAudioNode.gain.setValueAtTime(volume, this._audioCtx.currentTime);
         }
     }
 

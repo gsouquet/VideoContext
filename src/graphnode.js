@@ -155,9 +155,6 @@ class GraphNode {
      *
      */
     connect(targetNode, targetPort) {
-        console.log(".///////////.");
-        console.log(this._displayName, this._renderGraph);
-        console.log(".///////////.");
         return this._renderGraph.registerConnection(this, targetNode, targetPort);
     }
 

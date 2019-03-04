@@ -13,6 +13,10 @@ class CanvasNode extends SourceNode {
         this._displayName = TYPE;
     }
 
+    get hasAudio() {
+        return false;
+    }
+
     _load() {
         super._load();
         this._ready = true;

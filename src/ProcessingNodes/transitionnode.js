@@ -8,8 +8,10 @@ class TransitionNode extends EffectNode {
      * Initialise an instance of a TransitionNode. You should not instantiate this directly, but use vc.transition().
      */
     constructor(gl, audioCtx, renderGraph, definition = {}) {
-        definition.hearable = {
-            audioNodesFactory: audioCtx => {
+        definition.hearable = definition.hearable || {};
+
+        if (!definition.hearable.audioNodesFactory) {
+            definition.hearable.audioNodesFactory = audioCtx => {
                 const mergerNode = audioCtx.createGain();
 
                 const inputs = Array.from(
@@ -25,8 +27,8 @@ class TransitionNode extends EffectNode {
                     input: inputs,
                     output: mergerNode
                 };
-            }
-        };
+            };
+        }
 
         super(gl, audioCtx, renderGraph, definition);
         this._transitions = {};
@@ -176,10 +178,16 @@ class TransitionNode extends EffectNode {
 
                     if (this._audioCtx) {
                         for (let i = 0; i < this.inputs.length; i++) {
-                            const value =
-                                i % 2 === 0
-                                    ? Math.abs(difference * progress - transition.target)
-                                    : difference * progress + transition.current;
+                            let value;
+                            const { interpolator } = this._definition.hearable;
+                            if (interpolator) {
+                                value = interpolator(transition, difference, progress, i);
+                            } else {
+                                value =
+                                    i % 2 === 0
+                                        ? Math.abs(difference * progress - transition.target)
+                                        : difference * progress + transition.current;
+                            }
 
                             const node = this.inputAudioNode[i];
                             node.gain.setValueAtTime(value, this._audioCtx.currentTime);
