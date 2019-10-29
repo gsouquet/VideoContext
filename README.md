@@ -124,6 +124,50 @@ canvasNode.stop(4);
 
 ```
 
+### CustomSourceNode
+
+Sometimes using the pre-built node is just not enough.
+You can create your own source nodes that host more logic and let you hook into the VideoContext Node API easily.
+
+View below a custom source node that can now play an HLS VOD.
+
+```JavaScript
+
+import Hls from "hls.js";
+
+class HLSNode extends VideoNode {
+    constructor(src, gl, renderGraph, currentTime, playbackRate, sourceOffset, preloadTime, hlsOptions = {}) {
+
+        this._src = src;
+        const video = document.createElement("video");
+        this.hls = new Hls(hlsOptions);
+        this.hls.attachVideo(video);
+
+        super(video, gl, renderGraph, currentTime, playbackRate, sourceOffset, preloadTime);
+
+        this._displayName = "HLSNode";
+        this._elementType = "hls";
+    }
+
+    _load() {
+        this.hls.loadSource(this._src);
+        this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            this._ready = true;
+            this._triggerCallbacks("loaded");
+        });
+    }
+
+    destroy() {
+        if (this.hls) {
+            this.hls.destroy();
+        }
+        super.destroy();
+    }
+}
+
+```
+
+Another use case for custom node types would be to play GIFs. The custom node would be in charge of decode the GIF frames and paint them on a canvas depending on the `_update` calls from `VideoContext`.
 
 ### EffectNode
 An EffectNode is the simplest form of processing node. It's built from a definition object, which is a combination of fragment shader code, vertex shader code, input descriptions, and property descriptions. There are a number of common operations available as node descriptions accessible as static properties on the VideoContext at VideoContext.DESCRIPTIONS.*
@@ -390,6 +434,38 @@ var effectDefinition ={
 };
 ```
 
+## Audio management
+
+VideoContext manages the audio output through the Web Audio API by default. It is possible to change that behaviour by toggling the `webAudioEnabled` option when creating a VideoContext instance.
+
+By default every transition node will cross fade the audio. It is possible to override that by adding a `hearable` property on the effect definition
+
+```
+const definition = {
+  title: "Star wipe",
+  ...,
+  hearable: {
+    audioNodesFactory: (audioCtx) => {
+
+        const convolver = audioCtx.createConvolver();
+        const biquadFilter = audioCtx.createBiquadFilter();
+
+        biquadFilter.type = "lowshelf";
+
+        // connect the nodes together
+
+        convolver.connect(biquadFilter);
+
+        return {
+            input: convolver,
+            output: biquadFilter,
+        };
+    }
+  }
+}
+```
+
+VideoContext will be in charge of connection `input` to the source node and `output` to the destination of the effect node. The `input` and `output` can be the same.
 
 ## Development
 VideoContext has a pretty standard `package.json`

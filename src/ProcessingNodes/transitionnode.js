@@ -170,13 +170,12 @@ class TransitionNode extends EffectNode {
                     this[propertyName] = propertyValue;
 
                     if (this._audioCtx) {
-                        for (let index = 0; index < this.inputs.length; index++) {
-                            const input = this.inputs[index];
+                        for (let i = 0; i < this.inputs.length; i++) {
                             const value =
-                                index % 2 === 0
+                                i % 2 === 0
                                     ? difference * progress - transition.target
                                     : difference * progress + transition.current;
-                            input.outputAudioNode.gain.setValueAtTime(
+                            this.inputs[i].outputAudioNode.gain.setValueAtTime(
                                 value,
                                 this._audioCtx.currentTime
                             );
@@ -191,54 +190,13 @@ class TransitionNode extends EffectNode {
         }
     }
 
-    // _setAudioParams() {
-    //     if (this._definition.hearable) {
-
-    //         const rampType = this._definition.hearable.rampType || `linear`;
-
-    //         Object.keys(this._transitions).forEach(transitionName => {
-    //             this._transitions[transitionName].forEach(({ start, end, current, target }) => {
-
-    //                 this.inputs.forEach((input, index) => {
-
-    //                     const addAudioTransition = () => {
-    //                         const initialValue = index % 2 === 0 ? current : target;
-    //                         const targetValue = index % 2 === 0 ? target : current;
-    //                         console.log(input.outputAudioNode);
-    //                         input.outputAudioNode.gain.setValueAtTime(initialValue, start);
-    //                         input.outputAudioNode.gain[`${rampType}RampToValueAtTime`](targetValue, end);
-    //                         input.unregisterCallback("audioready", addAudioTransition);
-    //                     };
-
-    //                     if (input._audioReady) {
-    //                         addAudioTransition();
-    //                     } else {
-    //                         input.registerCallback("audioready", addAudioTransition);
-    //                     }
-    //                 });
-
-    //             });
-    //         });
-    //     }
-    // }
-
-    // _resetAudioParams() {
-    //     if (this._definition.hearable) {
-    //         console.log("let's reset the audio params");
-    //     }
-    // }
-
     connect() {
         const isConnected = super.connect.apply(this, arguments);
-        // if (this._inputNames.length === this.inputs.length) {
-        //     this._setAudioParams();
-        // }
         return isConnected;
     }
 
     disconnect() {
         const isDisconnected = super.disconnect(arguments);
-        // this._resetAudioParams();
         return isDisconnected;
     }
 }
